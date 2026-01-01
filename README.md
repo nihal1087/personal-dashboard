@@ -1,59 +1,92 @@
-# Personal Dashboard
+## 🌄 Personal Dashboard
 
-A modern, interactive, and motivational dashboard built with **HTML, CSS, and JavaScript**.  
-It displays the **current time**, **local weather**, **latest GitHub repositories**, **inspirational quotes**, and a **random nature background** from Unsplash. Designed as a personal new tab extension or web dashboard.
+Personal Dashboard is a modern, interactive new-tab dashboard extension built using HTML, CSS, and Vanilla JavaScript.
+It replaces your browser’s new tab with a clean, motivational dashboard showing live time, weather, GitHub activity, LeetCode progress, quotes, and dynamic nature backgrounds.
+Designed for productivity, learning motivation, and a minimal aesthetic.
 
 ---
 
 ## 🌟 Features
 
-- **Dynamic Backgrounds**: Fetches a new random nature image from Unsplash each time the dashboard loads.
-- **GitHub Integration**: Shows your **latest 3 repositories** with names, links, and programming languages.
-- **Inspirational Quotes**: Fetches a random motivational quote from [ZenQuotes](https://zenquotes.io/).
-- **Local Weather**: Shows current weather based on your geolocation using OpenWeatherMap API.
-- **Live Clock**: Displays the current time with live updates every second.
-- **Interactive Author Link**: Clicking on the Unsplash photo author’s name opens their Unsplash profile in a new tab.
+- **🌅 Dynamic Nature Backgrounds**:Fetches a random high-quality nature image from Unsplash on each new tab.
+- **🧑‍💻 GitHub Integration**: Shows your **latest 3 repositories** with names, links, and programming languages.
+- **📘 LeetCode Progress Visualization**: Interactive SVG donut chart showing Easy, Medium, and Hard problems solved.
+Hovering over each section updates the center with category-wise stats.
+- **💬Inspirational Quotes**: Fetches a random motivational quote from [ZenQuotes](https://zenquotes.io/).
+- **🌦 Local Weather**: Shows current weather based on your geolocation using OpenWeatherMap API.
+- **⏰ Live Clock**: Displays the current time with live updates every second.
+- **🔗 Photo Credits**
+Clicking the author name opens the photographer’s Unsplash profile.
 
 ---
 
 ## 🖥️ Demo
+---
 
-> Open the dashboard as a **new tab** in your browser or run the HTML file locally.  
+This project is designed to work as:
+- A Chrome New Tab extension
+- A standalone web dashboard
+>Simply open a **new tab** after installing the extension to see it in action.
+![Personal Dashboard Preview](dashboard.png)
 
-🛠️ Technologies Used
+---
 
-HTML5 & CSS3 for layout and styling.
+## 🛠️ Technologies Used
+---
 
-Vanilla JavaScript (ES6+) for dynamic content.
+- HTML5 & CSS3 – Layout, styling, and responsive design
+- Vanilla JavaScript (ES6+) – Application logic and API handling
+- SVG – Interactive LeetCode donut chart
+- Fetch API – Data retrieval from external APIs
 
-Fetch API to get data from:
+APIs Used
+- Unsplash API – Random nature backgrounds
+- GitHub REST API – Latest repositories
+- LeetCode Stats API (Unofficial) – Problem-solving statistics
+- ZenQuotes API – Motivational quotes
+- OpenWeatherMap API – Weather data
 
-Unsplash
- – random nature photos
+---
 
-GitHub API
- – latest repos
+## ⚙️ Customization 
+---
 
-ZenQuotes
- – motivational quotes
+- You can easily personalize the dashboard:
+- Change the GitHub username in index.js
+- Update the LeetCode username to show your own stats
+- Modify the Unsplash search query for different background themes
+- Replace the quotes API with another provider
+- Adjust colors, layout, and animations in index.css
 
-OpenWeatherMap
- – weather data
+---
 
- 💡 Customization
+## 🔒 Privacy & Permissions 
+---
 
-Change the GitHub username in index.js to display your own repositories.
-
-Modify the Unsplash query in index.js for different background themes.
-
-Replace ZenQuotes API with any other quotes API if desired.
-
-Update CSS to customize the look and feel of the dashboard.
+- This extension does not collect, store, or transmit personal data
+- All data is fetched directly from public APIs and stays on the user’s - device
+- Location access is used only to display local weather.
 
 ⚠️ Notes
+- GitHub API requests may be rate-limited for unauthenticated users
+- Location permission is required for the weather widget
+- An active internet connection is needed for dynamic content
 
-GitHub API may be rate-limited if unauthenticated. For frequent use, consider using a GitHub token.
+---
+## 🚀 Installation (Local)
+--- 
 
-Location access is required for the weather widget to function correctly.
+- Clone this repository
+- Open Chrome and go to chrome://extensions
+- Enable Developer Mode
+- Click Load unpacked and select the project folder
+- Open a new tab 🎉
 
-Ensure an active internet connection to fetch all dynamic content.
+--- 
+## 📌 License
+---
+
+- This project is open-source and free to use for personal and educational purposes.
+- ⭐ If you found this project helpful, don’t forget to give it a star on GitHub!
+
+---

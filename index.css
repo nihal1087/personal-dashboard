@@ -29,11 +29,13 @@ div.top {
 h1#time {
     font-size: 5rem;
 }
-.time{
-  position: fixed;
-  top: 50%;
-  left: 48%;
-  transform: translate(-50%, -50%);
+.center{
+  display: flex;
+  text-align: start;
+flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 div#weather {
@@ -42,7 +44,6 @@ div#weather {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-self: flex-start;
-    margin-top: -20px;
 }
 
 div#weather > img {
@@ -60,12 +61,18 @@ p.weather-temp {
     font-size: 1.75rem;
     margin-left: -10px;
 }
-
+.bottom{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items:flex-end;
+}
 p#author {
     font-size: 1rem;
 }
 #author {
   cursor: pointer;
+  text-align: end;
   text-decoration: none;
   opacity: 0.9;
   transition: opacity 0.2s ease;
@@ -76,11 +83,10 @@ p#author {
   text-decoration: underline;
 }
 .repo {
-    background: #867e7e1a;
     border-radius: 8px;
     padding: 0.5em 1em;
     margin-top: 0.5em;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(2.5px);
 }
 
 .repo a {
@@ -120,4 +126,54 @@ p#author {
 #quote-author {
   font-size: 1.05rem;
   opacity: 0.8;
+}
+
+.leetcode {
+    border-radius: 8px;
+    padding: 1em;
+    margin-top: 0.75em;
+    backdrop-filter: blur(2.5px);
+    color: #f4ebc7;
+    text-align: center;
+}
+.leetcode a{
+    color: #f4ebc7;
+    text-decoration: none;
+}
+
+.leetcode svg {
+    width: 180px;
+    height: 180px;
+}
+
+.slice {
+    transform-origin: 50% 50%;
+    animation: drawSlice 1s ease-out forwards;
+    cursor: pointer;
+}
+
+@keyframes drawSlice {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.slice:hover {
+    opacity: 0.85;
+}
+
+.center-title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.center-sub {
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0.85;
 }

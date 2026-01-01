@@ -2,28 +2,27 @@
   "manifest_version": 3,
   "name": "Personal Dashboard",
   "version": "1.0.0",
-  "description": "A dynamic personal dashboard with time, weather, GitHub repos, quotes, and nature backgrounds.",
-  "action": {
-    "default_icon": "icon.png"
-  },
+  "description": "A customizable new tab dashboard with live time, weather, GitHub repositories, LeetCode progress, quotes, and dynamic backgrounds.",
+
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
+
   "permissions": [
-    "geolocation",
-    "storage"
+    "geolocation"
   ],
+
   "host_permissions": [
-    "https://api.allorigins.win/*",
     "https://apis.scrimba.com/*",
-    "https://images.unsplash.com/*",
-    "https://openweathermap.org/*",
     "https://api.github.com/*",
-    "https://zenquotes.io/*"
+    "https://leetcode-stats-api.herokuapp.com/*",
+    "https://zenquotes.io/*",
+    "https://openweathermap.org/*"
   ],
+
   "icons": {
-    "16": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
