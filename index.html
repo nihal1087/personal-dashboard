@@ -2,36 +2,26 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="index.css" />
   <title>Personal Dashboard</title>
 </head>
 
 <body>
-  <main>
-    <div class="top">
-      <div id="gitHub"></div>
-      
-      <div id="leetcode"></div>
-    </div>
+  <main class="dashboard">
+    <section id="gitHub" class="widget repo-widget" aria-live="polite"></section>
 
-    <div class="center">
+    <section class="focus" aria-label="Current time and quote">
       <h1 id="time" class="time"></h1>
       <div id="quote-section" class="quote-section">
-          <p id="quote-text"></p>
-          <p id="quote-author"></p>
+        <p id="quote-text"></p>
+        <p id="quote-author"></p>
       </div>
-    </div>
-    
+    </section>
 
-     
-    <div class="bottom">
-    <p id="author"></p>
-    <div id="weather"></div>
-    </div>  
-    
-
-
-
+    <section id="leetcode" class="widget leetcode" aria-live="polite"></section>
+    <section id="weather" class="widget weather-widget" aria-live="polite"></section>
+    <p id="author" class="photo-credit"></p>
   </main>
   <script src="index.js" type="module"></script>
 </body>

@@ -1,220 +1,317 @@
-(async function initDashboard() {
+const config = {
+    githubUsername: "nihal1087",
+    leetCodeUsername: "name_is_nihal",
+    leetCodeApiBaseUrl: "https://alfa-leetcode-api.onrender.com",
+    fallbackBackground:
+        "https://images.unsplash.com/photo-1560008511-11c63416e52d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+}
+
+const elements = {
+    author: document.getElementById("author"),
+    github: document.getElementById("gitHub"),
+    leetcode: document.getElementById("leetcode"),
+    quoteText: document.getElementById("quote-text"),
+    quoteAuthor: document.getElementById("quote-author"),
+    time: document.getElementById("time"),
+    weather: document.getElementById("weather")
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;")
+}
+
+function safeNumber(value) {
+    const number = Number(value)
+    return Number.isFinite(number) ? number : 0
+}
+
+async function fetchJson(url, errorMessage) {
+    const res = await fetch(url)
+    if (!res.ok) throw Error(`${errorMessage} (${res.status})`)
+    return res.json()
+}
+
+function setBackgroundImage(url) {
+    const backgroundImage = `url("${url}")`
+    document.documentElement.style.backgroundImage = backgroundImage
+    document.body.style.backgroundImage = backgroundImage
+}
+
+async function loadBackground() {
     let authorLink = ""
 
     try {
-        const res = await fetch(
-            "https://apis.scrimba.com/unsplash/photos/random?orientation=landscape&query=nature"
+        const data = await fetchJson(
+            "https://apis.scrimba.com/unsplash/photos/random?orientation=landscape&query=nature",
+            "Background data unavailable"
         )
-        const data = await res.json()
-        authorLink = data.user.links.html
 
-        document.body.style.backgroundImage = `url(${data.urls.regular})`
-        document.getElementById("author").textContent = `By: ${data.user.name}`
+        authorLink = data.user.links.html
+        setBackgroundImage(data.urls.regular)
+        elements.author.textContent = `By: ${data.user.name}`
     } catch (err) {
-        document.body.style.backgroundImage = `url(https://images.unsplash.com/photo-1560008511-11c63416e52d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)`
-        document.getElementById("author").textContent = `By: Dodi Achmad`
+        setBackgroundImage(config.fallbackBackground)
+        elements.author.textContent = "By: Dodi Achmad"
         console.error("Background fetch failed:", err)
     }
-    document.getElementById("author").addEventListener("click", () => {
+
+    elements.author.addEventListener("click", () => {
         if (authorLink) {
-            window.open(authorLink, "_blank")
+            window.open(authorLink, "_blank", "noreferrer")
         }
     })
+}
 
+async function loadGitHubRepos() {
     try {
-        const res = await fetch(
-            "https://api.github.com/users/nihal1087/repos?sort=updated&per_page=3"
+        const repos = await fetchJson(
+            `https://api.github.com/users/${config.githubUsername}/repos?sort=updated&per_page=3`,
+            "GitHub data unavailable"
         )
-        if (!res.ok) throw Error("GitHub data unavailable")
-        const repos = await res.json()
 
         const topRepos = repos
             .map(
                 (repo) => `
-                <div class="repo">
-                    <a href="${repo.html_url}" target="_blank">${repo.name}</a>
-                    <p>${repo.language || "Unknown"}</p>
-                </div>
-            `
+                    <div class="repo">
+                        <a href="${repo.html_url}" target="_blank" rel="noreferrer">
+                            ${escapeHtml(repo.name)}
+                        </a>
+                        <p>${escapeHtml(repo.language || "Unknown")}</p>
+                    </div>
+                `
             )
             .join("")
 
-        document.getElementById("gitHub").innerHTML = `
-            <h3>🧑‍💻 Latest Repos</h3>
-            ${topRepos}
+        elements.github.innerHTML = `
+            <h2>Latest Repos</h2>
+            <div class="repo-list">
+                ${topRepos}
+            </div>
         `
     } catch (err) {
         console.error("GitHub fetch failed:", err)
-        document.getElementById(
-            "gitHub"
-        ).innerHTML = `<p>GitHub data unavailable</p>`
+        elements.github.innerHTML = '<p class="panel-status">GitHub data unavailable</p>'
     }
-    async function loadLeetCodeStats() {
-    const username = "name_is_nihal"
+}
+
+function getLeetCodeDifficultyCount(data, difficulty) {
+    const submissions = Array.isArray(data.acSubmissionNum) ? data.acSubmissionNum : []
+    const entry = submissions.find((item) => item.difficulty === difficulty)
+    return safeNumber(entry?.count)
+}
+
+function normalizeLeetCodeStats(data) {
+    const easySolved = safeNumber(data.easySolved) || getLeetCodeDifficultyCount(data, "Easy")
+    const mediumSolved =
+        safeNumber(data.mediumSolved) || getLeetCodeDifficultyCount(data, "Medium")
+    const hardSolved = safeNumber(data.hardSolved) || getLeetCodeDifficultyCount(data, "Hard")
+    const totalSolved =
+        safeNumber(data.solvedProblem) ||
+        getLeetCodeDifficultyCount(data, "All") ||
+        easySolved + mediumSolved + hardSolved
+
+    return {
+        totalSolved,
+        sections: [
+            { label: "Easy", value: easySolved, color: "#1DBBBA" },
+            { label: "Medium", value: mediumSolved, color: "#FEB701" },
+            { label: "Hard", value: hardSolved, color: "#F73637" }
+        ]
+    }
+}
+
+function buildLeetCodeSlices(sections, chartTotal) {
+    const radius = 64
+    const center = 90
+    const circumference = 2 * Math.PI * radius
+    const gap = 5
+    let offset = 0
+    let slices = ""
+
+    sections.forEach((section, index) => {
+        if (!section.value) return
+
+        const segmentLength = (section.value / chartTotal) * circumference
+        const visibleLength = Math.max(segmentLength - gap, 0)
+        const percent = ((section.value / chartTotal) * 100).toFixed(1)
+
+        slices += `
+            <circle
+                class="slice"
+                cx="${center}"
+                cy="${center}"
+                r="${radius}"
+                fill="none"
+                stroke="${section.color}"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-dasharray="${visibleLength} ${circumference - visibleLength}"
+                stroke-dashoffset="${-offset}"
+                transform="rotate(-90 ${center} ${center})"
+                style="animation-delay:${index * 0.15}s"
+                data-label="${section.label}"
+                data-value="${section.value}"
+                data-percent="${percent}"
+            />
+        `
+        offset += segmentLength
+    })
+
+    return slices
+}
+
+function renderLeetCodeUnavailable() {
+    elements.leetcode.innerHTML = `
+        <h2>
+            <a href="https://leetcode.com/${config.leetCodeUsername}" target="_blank" rel="noreferrer">
+                LeetCode
+            </a>
+        </h2>
+        <p class="leetcode-status">Stats unavailable</p>
+    `
+}
+
+async function loadLeetCodeStats() {
+    elements.leetcode.innerHTML = `
+        <h2>
+            <a href="https://leetcode.com/${config.leetCodeUsername}" target="_blank" rel="noreferrer">
+                LeetCode
+            </a>
+        </h2>
+        <p class="leetcode-status">Loading stats...</p>
+    `
 
     try {
-        const res = await fetch(
-            `https://leetcode-stats-api.herokuapp.com/${username}`
+        const data = await fetchJson(
+            `${config.leetCodeApiBaseUrl}/${config.leetCodeUsername}/solved`,
+            "LeetCode data unavailable"
         )
-        if (!res.ok) throw Error("LeetCode data unavailable")
+        const { totalSolved, sections } = normalizeLeetCodeStats(data)
+        const chartTotal = sections.reduce((sum, section) => sum + section.value, 0)
 
-        const data = await res.json()
+        if (!chartTotal) throw Error("LeetCode stats are empty")
 
-        const total = data.totalSolved
+        elements.leetcode.innerHTML = `
+            <h2>
+                <a href="https://leetcode.com/${config.leetCodeUsername}" target="_blank" rel="noreferrer">
+                    LeetCode
+                </a>
+            </h2>
 
-        const sections = [
-            { label: "Easy", value: data.easySolved, color: "#1DBBBA" },
-            { label: "Medium", value: data.mediumSolved, color: "#FEB701" },
-            { label: "Hard", value: data.hardSolved, color: "#F73637" }
-        ]
+            <svg viewBox="0 0 180 180" role="img" aria-label="LeetCode solved problems by difficulty">
+                <circle class="chart-track" cx="90" cy="90" r="64" />
+                ${buildLeetCodeSlices(sections, chartTotal)}
+                <text id="center-title" x="90" y="85" text-anchor="middle"
+                    class="center-title">
+                    Total
+                </text>
+                <text id="center-sub" x="90" y="102" text-anchor="middle"
+                    class="center-sub">
+                    ${totalSolved || chartTotal} solved
+                </text>
+            </svg>
 
-        const radius = 75
-        const center = 90
-        let cumulativeAngle = 0
-
-        function polarToCartesian(cx, cy, r, angle) {
-            const rad = (angle - 90) * Math.PI / 180
-            return {
-                x: cx + r * Math.cos(rad),
-                y: cy + r * Math.sin(rad)
-            }
-        }
-
-        function describeArc(startAngle, endAngle) {
-            const start = polarToCartesian(center, center, radius, endAngle)
-            const end = polarToCartesian(center, center, radius, startAngle)
-            const largeArc = endAngle - startAngle > 180 ? 1 : 0
-
-            return `
-                M ${center} ${center}
-                L ${start.x} ${start.y}
-                A ${radius} ${radius} 0 ${largeArc} 0 ${end.x} ${end.y}
-                Z
-            `
-        }
-
-        let slices = ""
-
-        sections.forEach((sec, i) => {
-            const angle = (sec.value / total) * 360
-            const start = cumulativeAngle
-            const end = cumulativeAngle + angle
-            cumulativeAngle += angle
-
-            const percent = ((sec.value / total) * 100).toFixed(1)
-
-            slices += `
-                <path
-                    class="slice"
-                    d="${describeArc(start, end)}"
-                    fill="${sec.color}"
-                    style="animation-delay:${i * 0.15}s"
-                    data-label="${sec.label}"
-                    data-value="${sec.value}"
-                    data-percent="${percent}"
-                />
-            `
-        })
-
-        document.getElementById("leetcode").innerHTML = `
-            <div class="leetcode">
-                <h3>
-                    <a href="https://leetcode.com/${username}" target="_blank">
-                        📘 LeetCode
-                    </a>
-                </h3>
-
-                <svg viewBox="0 0 180 180">
-                    ${slices}
-
-                    <!-- donut hole -->
-                    <circle cx="90" cy="90" r="55" fill="#1e1e1e" />
-
-                    <!-- center text -->
-                    <text id="center-title" x="90" y="85" text-anchor="middle"
-                        fill="#f4ebc7" class="center-title">
-                        Total
-                    </text>
-
-                    <text id="center-sub" x="90" y="102" text-anchor="middle"
-                        fill="#f4ebc7" class="center-sub">
-                        ${total} solved
-                    </text>
-                </svg>
+            <div class="leetcode-stats">
+                ${sections
+                    .map(
+                        (section) => `
+                            <span style="--stat-color:${section.color}">
+                                <i class="stat-dot" aria-hidden="true"></i>
+                                ${section.label}: ${section.value}
+                            </span>
+                        `
+                    )
+                    .join("")}
             </div>
         `
 
-        const title = document.getElementById("center-title")
-        const sub = document.getElementById("center-sub")
+        const title = elements.leetcode.querySelector("#center-title")
+        const sub = elements.leetcode.querySelector("#center-sub")
 
-        document.querySelectorAll(".slice").forEach(slice => {
+        elements.leetcode.querySelectorAll(".slice").forEach((slice) => {
             slice.addEventListener("mouseenter", () => {
                 title.textContent = slice.dataset.label
-                sub.textContent =
-                    `${slice.dataset.value} solved (${slice.dataset.percent}%)`
+                sub.textContent = `${slice.dataset.value} solved (${slice.dataset.percent}%)`
             })
 
             slice.addEventListener("mouseleave", () => {
                 title.textContent = "Total"
-                sub.textContent = `${total} solved`
+                sub.textContent = `${totalSolved || chartTotal} solved`
             })
         })
-
     } catch (err) {
-        console.error(err)
-        document.getElementById("leetcode").innerHTML = `
-            <div class="leetcode">
-                <h3>📘 LeetCode</h3>
-                <p>Stats unavailable</p>
-            </div>
-        `
+        console.error("LeetCode fetch failed:", err)
+        renderLeetCodeUnavailable()
     }
 }
 
-loadLeetCodeStats()
-
-    
+function startClock() {
     function getCurrentTime() {
         const date = new Date()
-        document.getElementById("time").textContent = date.toLocaleTimeString(
-            "en-us",
-            { timeStyle: "short" }
-        )
+        elements.time.textContent = date.toLocaleTimeString("en-us", { timeStyle: "short" })
     }
-    setInterval(getCurrentTime, 60000)
-    getCurrentTime()
 
+    getCurrentTime()
+    setInterval(getCurrentTime, 60000)
+}
+
+async function loadQuote() {
     try {
-        const res = await fetch("https://zenquotes.io/api/random")
-        const data = await res.json()
-        document.getElementById("quote-text").textContent = `"${data[0].q}"`
-        document.getElementById("quote-author").textContent = `- ${data[0].a}`
+        const data = await fetchJson("https://zenquotes.io/api/random", "Quote data unavailable")
+        elements.quoteText.textContent = `"${data[0].q}"`
+        elements.quoteAuthor.textContent = `- ${data[0].a}`
     } catch (err) {
         console.error("Quote fetch failed:", err)
-        document.getElementById(
-            "quote-text"
-        ).textContent = `"Stay positive, work hard, make it happen."`
-        document.getElementById("quote-author").textContent = `- Unknown`
+        elements.quoteText.textContent = `"Stay positive, work hard, make it happen."`
+        elements.quoteAuthor.textContent = "- Unknown"
+    }
+}
+
+function loadWeather() {
+    if (!navigator.geolocation) {
+        elements.weather.innerHTML = '<p class="weather-status">Weather data unavailable</p>'
+        return
     }
 
-    navigator.geolocation.getCurrentPosition(async (position) => {
-        try {
-            const res = await fetch(
-                `https://apis.scrimba.com/openweathermap/data/2.5/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}&units=metric`
-            )
-            if (!res.ok) throw Error("Weather data not available")
-            const data = await res.json()
-            const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+    elements.weather.innerHTML = '<p class="weather-status">Loading weather...</p>'
 
-            document.getElementById("weather").innerHTML = `
-                <img src=${iconUrl} />
-                <p class="weather-temp">${Math.round(data.main.temp)}ºC</p>
-                <p class="weather-city">${data.name}</p>
-            `
-        } catch (err) {
-            console.error("Weather fetch failed:", err)
-            document.getElementById("weather").textContent =
-                "Weather data unavailable"
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            try {
+                const data = await fetchJson(
+                    `https://apis.scrimba.com/openweathermap/data/2.5/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}&units=metric`,
+                    "Weather data unavailable"
+                )
+                const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+
+                elements.weather.innerHTML = `
+                    <img src="${iconUrl}" alt="${escapeHtml(data.weather[0].description)}" />
+                    <p class="weather-temp">${Math.round(data.main.temp)}&deg;C</p>
+                    <p class="weather-city">${escapeHtml(data.name)}</p>
+                `
+            } catch (err) {
+                console.error("Weather fetch failed:", err)
+                elements.weather.innerHTML = '<p class="weather-status">Weather data unavailable</p>'
+            }
+        },
+        () => {
+            elements.weather.innerHTML = '<p class="weather-status">Weather permission needed</p>'
         }
-    })
-})()
+    )
+}
+
+function initDashboard() {
+    loadBackground()
+    loadGitHubRepos()
+    loadLeetCodeStats()
+    startClock()
+    loadQuote()
+    loadWeather()
+}
+
+initDashboard()

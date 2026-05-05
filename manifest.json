@@ -15,7 +15,7 @@
   "host_permissions": [
     "https://apis.scrimba.com/*",
     "https://api.github.com/*",
-    "https://leetcode-stats-api.herokuapp.com/*",
+    "https://alfa-leetcode-api.onrender.com/*",
     "https://zenquotes.io/*",
     "https://openweathermap.org/*"
   ],

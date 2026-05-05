@@ -42,7 +42,7 @@ This project is designed to work as:
 APIs Used
 - Unsplash API – Random nature backgrounds
 - GitHub REST API – Latest repositories
-- LeetCode Stats API (Unofficial) – Problem-solving statistics
+- Alfa LeetCode API (Unofficial) – Problem-solving statistics
 - ZenQuotes API – Motivational quotes
 - OpenWeatherMap API – Weather data
 
